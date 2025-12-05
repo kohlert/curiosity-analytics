@@ -261,6 +261,10 @@
                 <div class="stat-value" id="accuracy">0%</div>
                 <div class="stat-label">Accuracy</div>
             </div>
+            <div class="stat-item">
+                <div class="stat-value" id="progress">0 / 50</div>
+                <div class="stat-label">States This Round</div>
+            </div>
         </div>
     </div>
 
@@ -346,6 +350,10 @@
         let answered = false;
         let mapLoaded = false;
         let svg, path, projection, states;
+        
+        // State queue for sampling without replacement
+        let stateQueue = [];
+        let currentStateIndex = 0;
 
         // Load and render the map
         async function loadMap() {
@@ -444,9 +452,35 @@
             return bestScore >= threshold ? { match: bestMatch, score: bestScore } : null;
         }
 
-        function getRandomState() {
-            const states = Object.keys(statesData);
-            return states[Math.floor(Math.random() * states.length)];
+        // Fisher-Yates shuffle algorithm
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        // Initialize or reshuffle the state queue
+        function initializeStateQueue() {
+            const allStates = Object.keys(statesData);
+            stateQueue = shuffleArray(allStates);
+            currentStateIndex = 0;
+        }
+
+        // Get next state from queue (sampling without replacement)
+        function getNextState() {
+            let newRound = false;
+            // If queue is empty or we've gone through all states, reshuffle
+            if (stateQueue.length === 0 || currentStateIndex >= stateQueue.length) {
+                initializeStateQueue();
+                newRound = true;
+            }
+            
+            const state = stateQueue[currentStateIndex];
+            currentStateIndex++;
+            return { state, newRound };
         }
 
         function highlightState(stateName) {
@@ -491,14 +525,33 @@
             }
         }
 
+        function updateProgress() {
+            const totalStates = Object.keys(statesData).length;
+            const completed = currentStateIndex;
+            document.getElementById('progress').textContent = `${completed} / ${totalStates}`;
+        }
+
         function newQuestion() {
             if (!mapLoaded) {
                 setTimeout(newQuestion, 100);
                 return;
             }
             
-            currentState = getRandomState();
+            const result = getNextState();
+            currentState = result.state;
+            
+            // Show message if starting a new round
+            if (result.newRound && totalCount > 0) {
+                const feedback = document.getElementById('feedback');
+                feedback.textContent = '🎉 Completed all 50 states! Starting a new round...';
+                feedback.classList.add('show', 'correct');
+                setTimeout(() => {
+                    feedback.classList.remove('show', 'correct');
+                }, 2000);
+            }
+            
             highlightState(currentState);
+            updateProgress();
             
             document.getElementById('state-input').value = '';
             document.getElementById('capital-input').value = '';
@@ -623,6 +676,7 @@
 
         // Initialize when page loads
         window.addEventListener('load', () => {
+            initializeStateQueue();
             loadMap();
         });
     </script>
