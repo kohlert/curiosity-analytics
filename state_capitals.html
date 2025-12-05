@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>US States and Capitals Quiz</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 30px;
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+
+        .quiz-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .map-container {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 400px;
+        }
+
+        .map-container svg {
+            width: 100%;
+            height: auto;
+            max-width: 100%;
+        }
+
+        .map-container svg path.state {
+            fill: #e0e0e0;
+            stroke: #fff;
+            stroke-width: 1;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .map-container svg path.state:hover {
+            opacity: 0.8;
+        }
+
+        .map-container svg path.state.highlighted {
+            fill: #ff6b6b !important;
+            stroke: #c92a2a !important;
+            stroke-width: 2 !important;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .input-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            font-weight: 600;
+            color: #555;
+            font-size: 1.1em;
+        }
+
+        input {
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        input.correct {
+            border-color: #51cf66;
+            background-color: #d3f9d8;
+        }
+
+        input.incorrect {
+            border-color: #ff6b6b;
+            background-color: #ffe3e3;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+        }
+
+        button {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex: 1;
+        }
+
+        .submit-btn {
+            background: #667eea;
+            color: white;
+        }
+
+        .submit-btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .next-btn {
+            background: #51cf66;
+            color: white;
+        }
+
+        .next-btn:hover {
+            background: #40c057;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(81, 207, 102, 0.4);
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 2px solid #eee;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .feedback {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+            display: none;
+        }
+
+        .feedback.show {
+            display: block;
+        }
+
+        .feedback.correct {
+            background: #d3f9d8;
+            color: #2b8a3e;
+        }
+
+        .feedback.incorrect {
+            background: #ffe3e3;
+            color: #c92a2a;
+        }
+
+        @media (max-width: 768px) {
+            .quiz-section {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🇺🇸 US States and Capitals Quiz</h1>
+        
+        <div class="quiz-section">
+            <div class="map-container">
+                <svg id="us-map" xmlns="http://www.w3.org/2000/svg"></svg>
+            </div>
+            
+            <div class="input-section">
+                <div class="input-group">
+                    <label for="state-input">State Name:</label>
+                    <input type="text" id="state-input" placeholder="Enter state name..." autocomplete="off" spellcheck="true">
+                    <small style="color: #666; font-size: 0.85em; margin-top: 4px;">Spell checker enabled</small>
+                </div>
+                
+                <div class="input-group">
+                    <label for="capital-input">Capital City:</label>
+                    <input type="text" id="capital-input" placeholder="Enter capital city..." autocomplete="off" spellcheck="true">
+                    <small style="color: #666; font-size: 0.85em; margin-top: 4px;">Spell checker enabled</small>
+                </div>
+                
+                <div class="button-group">
+                    <button class="submit-btn" id="submit-btn">Submit Answer</button>
+                    <button class="next-btn" id="next-btn" style="display: none;">Next State</button>
+                </div>
+                
+                <div class="feedback" id="feedback"></div>
+            </div>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-value" id="correct-count">0</div>
+                <div class="stat-label">Correct</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="total-count">0</div>
+                <div class="stat-label">Total</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="accuracy">0%</div>
+                <div class="stat-label">Accuracy</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load D3.js for map rendering -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://unpkg.com/topojson@3"></script>
+    
+    <script>
+        // US States and Capitals data
+        const statesData = {
+            "Alabama": { capital: "Montgomery", id: "AL" },
+            "Alaska": { capital: "Juneau", id: "AK" },
+            "Arizona": { capital: "Phoenix", id: "AZ" },
+            "Arkansas": { capital: "Little Rock", id: "AR" },
+            "California": { capital: "Sacramento", id: "CA" },
+            "Colorado": { capital: "Denver", id: "CO" },
+            "Connecticut": { capital: "Hartford", id: "CT" },
+            "Delaware": { capital: "Dover", id: "DE" },
+            "Florida": { capital: "Tallahassee", id: "FL" },
+            "Georgia": { capital: "Atlanta", id: "GA" },
+            "Hawaii": { capital: "Honolulu", id: "HI" },
+            "Idaho": { capital: "Boise", id: "ID" },
+            "Illinois": { capital: "Springfield", id: "IL" },
+            "Indiana": { capital: "Indianapolis", id: "IN" },
+            "Iowa": { capital: "Des Moines", id: "IA" },
+            "Kansas": { capital: "Topeka", id: "KS" },
+            "Kentucky": { capital: "Frankfort", id: "KY" },
+            "Louisiana": { capital: "Baton Rouge", id: "LA" },
+            "Maine": { capital: "Augusta", id: "ME" },
+            "Maryland": { capital: "Annapolis", id: "MD" },
+            "Massachusetts": { capital: "Boston", id: "MA" },
+            "Michigan": { capital: "Lansing", id: "MI" },
+            "Minnesota": { capital: "Saint Paul", id: "MN" },
+            "Mississippi": { capital: "Jackson", id: "MS" },
+            "Missouri": { capital: "Jefferson City", id: "MO" },
+            "Montana": { capital: "Helena", id: "MT" },
+            "Nebraska": { capital: "Lincoln", id: "NE" },
+            "Nevada": { capital: "Carson City", id: "NV" },
+            "New Hampshire": { capital: "Concord", id: "NH" },
+            "New Jersey": { capital: "Trenton", id: "NJ" },
+            "New Mexico": { capital: "Santa Fe", id: "NM" },
+            "New York": { capital: "Albany", id: "NY" },
+            "North Carolina": { capital: "Raleigh", id: "NC" },
+            "North Dakota": { capital: "Bismarck", id: "ND" },
+            "Ohio": { capital: "Columbus", id: "OH" },
+            "Oklahoma": { capital: "Oklahoma City", id: "OK" },
+            "Oregon": { capital: "Salem", id: "OR" },
+            "Pennsylvania": { capital: "Harrisburg", id: "PA" },
+            "Rhode Island": { capital: "Providence", id: "RI" },
+            "South Carolina": { capital: "Columbia", id: "SC" },
+            "South Dakota": { capital: "Pierre", id: "SD" },
+            "Tennessee": { capital: "Nashville", id: "TN" },
+            "Texas": { capital: "Austin", id: "TX" },
+            "Utah": { capital: "Salt Lake City", id: "UT" },
+            "Vermont": { capital: "Montpelier", id: "VT" },
+            "Virginia": { capital: "Richmond", id: "VA" },
+            "Washington": { capital: "Olympia", id: "WA" },
+            "West Virginia": { capital: "Charleston", id: "WV" },
+            "Wisconsin": { capital: "Madison", id: "WI" },
+            "Wyoming": { capital: "Cheyenne", id: "WY" }
+        };
+
+        // State name to FIPS code mapping (for TopoJSON)
+        const stateNameToFips = {
+            "Alabama": "01", "Alaska": "02", "Arizona": "04", "Arkansas": "05",
+            "California": "06", "Colorado": "08", "Connecticut": "09", "Delaware": "10",
+            "Florida": "12", "Georgia": "13", "Hawaii": "15", "Idaho": "16",
+            "Illinois": "17", "Indiana": "18", "Iowa": "19", "Kansas": "20",
+            "Kentucky": "21", "Louisiana": "22", "Maine": "23", "Maryland": "24",
+            "Massachusetts": "25", "Michigan": "26", "Minnesota": "27", "Mississippi": "28",
+            "Missouri": "29", "Montana": "30", "Nebraska": "31", "Nevada": "32",
+            "New Hampshire": "33", "New Jersey": "34", "New Mexico": "35", "New York": "36",
+            "North Carolina": "37", "North Dakota": "38", "Ohio": "39", "Oklahoma": "40",
+            "Oregon": "41", "Pennsylvania": "42", "Rhode Island": "44", "South Carolina": "45",
+            "South Dakota": "46", "Tennessee": "47", "Texas": "48", "Utah": "49",
+            "Vermont": "50", "Virginia": "51", "Washington": "53", "West Virginia": "54",
+            "Wisconsin": "55", "Wyoming": "56"
+        };
+
+        let currentState = null;
+        let correctCount = 0;
+        let totalCount = 0;
+        let answered = false;
+        let mapLoaded = false;
+        let svg, path, projection, states;
+
+        // Load and render the map
+        async function loadMap() {
+            const width = 959;
+            const height = 593;
+            
+            svg = d3.select("#us-map")
+                .attr("viewBox", `0 0 ${width} ${height}`)
+                .attr("preserveAspectRatio", "xMidYMid meet")
+                .style("width", "100%")
+                .style("height", "auto");
+
+            projection = d3.geoAlbersUsa()
+                .scale(1070)
+                .translate([width / 2, height / 2]);
+
+            path = d3.geoPath().projection(projection);
+
+            try {
+                // Load TopoJSON data
+                const topojsonData = await d3.json("https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json");
+                states = topojson.feature(topojsonData, topojsonData.objects.states).features;
+                
+                svg.selectAll("path")
+                    .data(states)
+                    .enter()
+                    .append("path")
+                    .attr("d", path)
+                    .attr("class", "state")
+                    .attr("fill", "#e0e0e0")
+                    .attr("stroke", "#fff")
+                    .attr("stroke-width", 1)
+                    .attr("data-fips", d => d.id);
+                
+                mapLoaded = true;
+                newQuestion();
+            } catch (error) {
+                console.error("Error loading map:", error);
+                // Fallback: show a message
+                document.querySelector('.map-container').innerHTML = 
+                    '<p style="text-align: center; padding: 40px; color: #666;">Map loading... If this persists, please check your internet connection.</p>';
+            }
+        }
+
+        function normalizeString(str) {
+            return str.toLowerCase().trim().replace(/\s+/g, ' ');
+        }
+
+        // Levenshtein distance for fuzzy matching
+        function levenshteinDistance(str1, str2) {
+            const m = str1.length;
+            const n = str2.length;
+            const dp = Array(m + 1).fill(null).map(() => Array(n + 1).fill(0));
+            
+            for (let i = 0; i <= m; i++) dp[i][0] = i;
+            for (let j = 0; j <= n; j++) dp[0][j] = j;
+            
+            for (let i = 1; i <= m; i++) {
+                for (let j = 1; j <= n; j++) {
+                    if (str1[i - 1] === str2[j - 1]) {
+                        dp[i][j] = dp[i - 1][j - 1];
+                    } else {
+                        dp[i][j] = Math.min(
+                            dp[i - 1][j] + 1,      // deletion
+                            dp[i][j - 1] + 1,      // insertion
+                            dp[i - 1][j - 1] + 1   // substitution
+                        );
+                    }
+                }
+            }
+            
+            return dp[m][n];
+        }
+
+        // Calculate similarity score (0-1, where 1 is identical)
+        function similarity(str1, str2) {
+            const maxLen = Math.max(str1.length, str2.length);
+            if (maxLen === 0) return 1;
+            const distance = levenshteinDistance(str1, str2);
+            return 1 - (distance / maxLen);
+        }
+
+        // Find closest match from a list of options
+        function findClosestMatch(input, options, threshold = 0.7) {
+            let bestMatch = null;
+            let bestScore = 0;
+            
+            for (const option of options) {
+                const score = similarity(input, normalizeString(option));
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestMatch = option;
+                }
+            }
+            
+            return bestScore >= threshold ? { match: bestMatch, score: bestScore } : null;
+        }
+
+        function getRandomState() {
+            const states = Object.keys(statesData);
+            return states[Math.floor(Math.random() * states.length)];
+        }
+
+        function highlightState(stateName) {
+            if (!mapLoaded || !svg) {
+                console.log("Map not loaded or SVG not available");
+                return;
+            }
+            
+            // Remove previous highlights - reset all states to default
+            svg.selectAll("path.state")
+                .classed("highlighted", false)
+                .attr("fill", "#e0e0e0")
+                .attr("stroke", "#fff")
+                .attr("stroke-width", 1);
+            
+            // Find and highlight the state by FIPS code
+            const fipsCode = stateNameToFips[stateName];
+            if (fipsCode) {
+                const statePaths = svg.selectAll("path.state")
+                    .filter(d => d.id === fipsCode);
+                
+                if (statePaths.size() > 0) {
+                    statePaths
+                        .classed("highlighted", true)
+                        .attr("fill", "#ff6b6b")
+                        .attr("stroke", "#c92a2a")
+                        .attr("stroke-width", 2);
+                } else {
+                    console.log(`State not found: ${stateName} (FIPS: ${fipsCode})`);
+                    // Try alternative matching by data-fips attribute
+                    svg.selectAll("path.state")
+                        .filter(function(d) {
+                            return d3.select(this).attr("data-fips") === fipsCode || d.id === fipsCode;
+                        })
+                        .classed("highlighted", true)
+                        .attr("fill", "#ff6b6b")
+                        .attr("stroke", "#c92a2a")
+                        .attr("stroke-width", 2);
+                }
+            } else {
+                console.log(`No FIPS code found for state: ${stateName}`);
+            }
+        }
+
+        function newQuestion() {
+            if (!mapLoaded) {
+                setTimeout(newQuestion, 100);
+                return;
+            }
+            
+            currentState = getRandomState();
+            highlightState(currentState);
+            
+            document.getElementById('state-input').value = '';
+            document.getElementById('capital-input').value = '';
+            document.getElementById('state-input').classList.remove('correct', 'incorrect');
+            document.getElementById('capital-input').classList.remove('correct', 'incorrect');
+            document.getElementById('feedback').classList.remove('show', 'correct', 'incorrect');
+            document.getElementById('submit-btn').style.display = 'block';
+            document.getElementById('next-btn').style.display = 'none';
+            
+            answered = false;
+            document.getElementById('state-input').focus();
+        }
+
+        function checkAnswer() {
+            if (answered) return;
+            
+            const stateInputRaw = document.getElementById('state-input').value;
+            const capitalInputRaw = document.getElementById('capital-input').value;
+            const stateInput = normalizeString(stateInputRaw);
+            const capitalInput = normalizeString(capitalInputRaw);
+            const correctState = normalizeString(currentState);
+            const correctCapital = normalizeString(statesData[currentState].capital);
+            
+            // Use spell checker with fuzzy matching (75% similarity threshold)
+            const stateSimilarity = similarity(stateInput, correctState);
+            const capitalSimilarity = similarity(capitalInput, correctCapital);
+            const SIMILARITY_THRESHOLD = 0.75;
+            
+            const stateCorrect = stateInput === correctState || stateSimilarity >= SIMILARITY_THRESHOLD;
+            const capitalCorrect = capitalInput === correctCapital || capitalSimilarity >= SIMILARITY_THRESHOLD;
+            const bothCorrect = stateCorrect && capitalCorrect;
+            
+            // Get suggestions if answer is close but not correct
+            let stateSuggestion = null;
+            let capitalSuggestion = null;
+            
+            if (!stateCorrect && stateInput.length > 0) {
+                const allStates = Object.keys(statesData);
+                const suggestion = findClosestMatch(stateInputRaw, allStates, 0.6);
+                if (suggestion && suggestion.match !== currentState) {
+                    stateSuggestion = suggestion.match;
+                }
+            }
+            
+            if (!capitalCorrect && capitalInput.length > 0) {
+                const allCapitals = Object.values(statesData).map(s => s.capital);
+                const suggestion = findClosestMatch(capitalInputRaw, allCapitals, 0.6);
+                if (suggestion && suggestion.match !== statesData[currentState].capital) {
+                    capitalSuggestion = suggestion.match;
+                }
+            }
+            
+            // Update input styling
+            document.getElementById('state-input').classList.add(stateCorrect ? 'correct' : 'incorrect');
+            document.getElementById('capital-input').classList.add(capitalCorrect ? 'correct' : 'incorrect');
+            
+            // Show feedback
+            const feedback = document.getElementById('feedback');
+            if (bothCorrect) {
+                let message = `✓ Correct! ${currentState}'s capital is ${statesData[currentState].capital}.`;
+                if (stateSimilarity < 1 || capitalSimilarity < 1) {
+                    message += ' (Accepted with spell checker)';
+                }
+                feedback.textContent = message;
+                feedback.classList.add('show', 'correct');
+                correctCount++;
+            } else {
+                let message = 'Incorrect. ';
+                if (!stateCorrect && !capitalCorrect) {
+                    message += `The state is ${currentState} and the capital is ${statesData[currentState].capital}.`;
+                    if (stateSuggestion) {
+                        message += ` Did you mean "${stateSuggestion}" for the state?`;
+                    }
+                    if (capitalSuggestion) {
+                        message += ` Did you mean "${capitalSuggestion}" for the capital?`;
+                    }
+                } else if (!stateCorrect) {
+                    message += `The state is ${currentState}.`;
+                    if (stateSuggestion) {
+                        message += ` Did you mean "${stateSuggestion}"?`;
+                    }
+                } else {
+                    message += `The capital is ${statesData[currentState].capital}.`;
+                    if (capitalSuggestion) {
+                        message += ` Did you mean "${capitalSuggestion}"?`;
+                    }
+                }
+                feedback.textContent = message;
+                feedback.classList.add('show', 'incorrect');
+            }
+            
+            totalCount++;
+            updateStats();
+            
+            document.getElementById('submit-btn').style.display = 'none';
+            document.getElementById('next-btn').style.display = 'block';
+            answered = true;
+        }
+
+        function updateStats() {
+            document.getElementById('correct-count').textContent = correctCount;
+            document.getElementById('total-count').textContent = totalCount;
+            const accuracy = totalCount > 0 ? Math.round((correctCount / totalCount) * 100) : 0;
+            document.getElementById('accuracy').textContent = accuracy + '%';
+        }
+
+        // Event listeners
+        document.getElementById('submit-btn').addEventListener('click', checkAnswer);
+        document.getElementById('next-btn').addEventListener('click', newQuestion);
+        
+        document.getElementById('state-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !answered) {
+                document.getElementById('capital-input').focus();
+            }
+        });
+        
+        document.getElementById('capital-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !answered) {
+                checkAnswer();
+            }
+        });
+
+        // Initialize when page loads
+        window.addEventListener('load', () => {
+            loadMap();
+        });
+    </script>
+</body>
+</html>
