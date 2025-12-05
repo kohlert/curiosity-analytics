@@ -215,21 +215,101 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        .welcome-screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .welcome-screen h1 {
+            margin-bottom: 10px;
+        }
+
+        .welcome-screen p {
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 1.1em;
+        }
+
+        .mode-selection {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .mode-btn {
+            padding: 20px 30px;
+            border: 3px solid #667eea;
+            border-radius: 12px;
+            background: white;
+            color: #667eea;
+            font-size: 1.2em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .mode-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .quiz-content {
+            display: none;
+        }
+
+        .quiz-content.active {
+            display: block;
+        }
+
+        .state-name-display {
+            padding: 12px 15px;
+            border: 2px solid #2196f3;
+            border-radius: 8px;
+            background: #e3f2fd;
+            font-size: 1em;
+            font-weight: 600;
+            color: #1976d2;
+            text-align: left;
+            min-height: 20px;
+        }
+
+        .input-group.hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>US States and Capitals Quiz</h1>
-        
-        <div class="quiz-section">
+        <!-- Welcome Screen -->
+        <div class="welcome-screen" id="welcome-screen">
+            <h1>US States and Capitals Quiz</h1>
+            <p>Choose your quiz mode:</p>
+            <div class="mode-selection">
+                <button class="mode-btn" data-mode="both">Both States & Capitals</button>
+                <button class="mode-btn" data-mode="states">States Only</button>
+                <button class="mode-btn" data-mode="capitals">Capitals Only</button>
+            </div>
+        </div>
+
+        <!-- Quiz Content -->
+        <div class="quiz-content" id="quiz-content">
+            <h1>US States and Capitals Quiz</h1>
+            
+            <div class="quiz-section">
             <div class="map-container">
                 <svg id="us-map" xmlns="http://www.w3.org/2000/svg"></svg>
             </div>
             
             <div class="input-section">
-                <div class="input-group">
+                <div class="input-group" id="state-input-group">
                     <label for="state-input">State Name:</label>
                     <input type="text" id="state-input" placeholder="Enter state name..." autocomplete="off" spellcheck="true">
+                    <div id="state-name-display" class="state-name-display" style="display: none;"></div>
                     <small style="color: #666; font-size: 0.85em; margin-top: 4px;">Spell checker enabled</small>
                 </div>
                 
@@ -350,6 +430,7 @@
         let answered = false;
         let mapLoaded = false;
         let svg, path, projection, states;
+        let quizMode = null; // 'both', 'states', or 'capitals'
         
         // State queue for sampling without replacement
         let stateQueue = [];
@@ -531,9 +612,53 @@
             document.getElementById('progress').textContent = `${completed} / ${totalStates}`;
         }
 
+        function startQuiz(mode) {
+            quizMode = mode;
+            document.getElementById('welcome-screen').style.display = 'none';
+            document.getElementById('quiz-content').classList.add('active');
+            
+            // Update UI based on mode
+            const stateInputGroup = document.getElementById('state-input').closest('.input-group');
+            const capitalInputGroup = document.getElementById('capital-input').closest('.input-group');
+            const stateInput = document.getElementById('state-input');
+            const stateNameDisplay = document.getElementById('state-name-display');
+            
+            if (mode === 'states') {
+                // States only - hide capital input
+                capitalInputGroup.classList.add('hidden');
+                stateInputGroup.classList.remove('hidden');
+                stateInput.style.display = 'block';
+                stateNameDisplay.style.display = 'none';
+            } else if (mode === 'capitals') {
+                // Capitals only - hide state input, show state name display
+                stateInputGroup.classList.remove('hidden'); // Keep group visible
+                stateInput.style.display = 'none'; // Hide the input
+                stateNameDisplay.style.display = 'block'; // Show the display
+                capitalInputGroup.classList.remove('hidden');
+            } else {
+                // Both - show everything
+                stateInputGroup.classList.remove('hidden');
+                stateInput.style.display = 'block';
+                stateNameDisplay.style.display = 'none';
+                capitalInputGroup.classList.remove('hidden');
+            }
+            
+            // Reset stats
+            correctCount = 0;
+            totalCount = 0;
+            currentStateIndex = 0;
+            initializeStateQueue();
+            updateStats();
+            
+            // Start first question
+            newQuestion();
+        }
+
         function newQuestion() {
-            if (!mapLoaded) {
-                setTimeout(newQuestion, 100);
+            if (!mapLoaded || !quizMode) {
+                if (!mapLoaded) {
+                    setTimeout(newQuestion, 100);
+                }
                 return;
             }
             
@@ -553,6 +678,11 @@
             highlightState(currentState);
             updateProgress();
             
+            // Update state name display for capitals-only mode
+            if (quizMode === 'capitals') {
+                document.getElementById('state-name-display').textContent = currentState;
+            }
+            
             document.getElementById('state-input').value = '';
             document.getElementById('capital-input').value = '';
             document.getElementById('state-input').classList.remove('correct', 'incorrect');
@@ -562,7 +692,13 @@
             document.getElementById('next-btn').style.display = 'none';
             
             answered = false;
-            document.getElementById('state-input').focus();
+            
+            // Focus on the appropriate input
+            if (quizMode === 'capitals') {
+                document.getElementById('capital-input').focus();
+            } else {
+                document.getElementById('state-input').focus();
+            }
         }
 
         function checkAnswer() {
@@ -576,19 +712,39 @@
             const correctCapital = normalizeString(statesData[currentState].capital);
             
             // Use spell checker with fuzzy matching (75% similarity threshold)
-            const stateSimilarity = similarity(stateInput, correctState);
-            const capitalSimilarity = similarity(capitalInput, correctCapital);
             const SIMILARITY_THRESHOLD = 0.75;
             
-            const stateCorrect = stateInput === correctState || stateSimilarity >= SIMILARITY_THRESHOLD;
-            const capitalCorrect = capitalInput === correctCapital || capitalSimilarity >= SIMILARITY_THRESHOLD;
+            let stateCorrect = false;
+            let capitalCorrect = false;
+            let stateSimilarity = 0;
+            let capitalSimilarity = 0;
+            
+            // Check answers based on quiz mode
+            if (quizMode === 'states') {
+                // Only check state
+                stateSimilarity = similarity(stateInput, correctState);
+                stateCorrect = stateInput === correctState || stateSimilarity >= SIMILARITY_THRESHOLD;
+                capitalCorrect = true; // Always true in states-only mode
+            } else if (quizMode === 'capitals') {
+                // Only check capital
+                capitalSimilarity = similarity(capitalInput, correctCapital);
+                capitalCorrect = capitalInput === correctCapital || capitalSimilarity >= SIMILARITY_THRESHOLD;
+                stateCorrect = true; // Always true in capitals-only mode
+            } else {
+                // Check both
+                stateSimilarity = similarity(stateInput, correctState);
+                capitalSimilarity = similarity(capitalInput, correctCapital);
+                stateCorrect = stateInput === correctState || stateSimilarity >= SIMILARITY_THRESHOLD;
+                capitalCorrect = capitalInput === correctCapital || capitalSimilarity >= SIMILARITY_THRESHOLD;
+            }
+            
             const bothCorrect = stateCorrect && capitalCorrect;
             
             // Get suggestions if answer is close but not correct
             let stateSuggestion = null;
             let capitalSuggestion = null;
             
-            if (!stateCorrect && stateInput.length > 0) {
+            if (quizMode !== 'capitals' && !stateCorrect && stateInput.length > 0) {
                 const allStates = Object.keys(statesData);
                 const suggestion = findClosestMatch(stateInputRaw, allStates, 0.6);
                 if (suggestion && suggestion.match !== currentState) {
@@ -596,7 +752,7 @@
                 }
             }
             
-            if (!capitalCorrect && capitalInput.length > 0) {
+            if (quizMode !== 'states' && !capitalCorrect && capitalInput.length > 0) {
                 const allCapitals = Object.values(statesData).map(s => s.capital);
                 const suggestion = findClosestMatch(capitalInputRaw, allCapitals, 0.6);
                 if (suggestion && suggestion.match !== statesData[currentState].capital) {
@@ -604,15 +760,26 @@
                 }
             }
             
-            // Update input styling
-            document.getElementById('state-input').classList.add(stateCorrect ? 'correct' : 'incorrect');
-            document.getElementById('capital-input').classList.add(capitalCorrect ? 'correct' : 'incorrect');
+            // Update input styling (only for visible inputs)
+            if (quizMode !== 'capitals') {
+                document.getElementById('state-input').classList.add(stateCorrect ? 'correct' : 'incorrect');
+            }
+            if (quizMode !== 'states') {
+                document.getElementById('capital-input').classList.add(capitalCorrect ? 'correct' : 'incorrect');
+            }
             
             // Show feedback
             const feedback = document.getElementById('feedback');
             if (bothCorrect) {
-                let message = `✓ Correct! ${currentState}'s capital is ${statesData[currentState].capital}.`;
-                if (stateSimilarity < 1 || capitalSimilarity < 1) {
+                let message = '';
+                if (quizMode === 'states') {
+                    message = `✓ Correct! The state is ${currentState}.`;
+                } else if (quizMode === 'capitals') {
+                    message = `✓ Correct! ${currentState}'s capital is ${statesData[currentState].capital}.`;
+                } else {
+                    message = `✓ Correct! ${currentState}'s capital is ${statesData[currentState].capital}.`;
+                }
+                if ((stateSimilarity < 1 && stateSimilarity > 0) || (capitalSimilarity < 1 && capitalSimilarity > 0)) {
                     message += ' (Accepted with spell checker)';
                 }
                 feedback.textContent = message;
@@ -620,23 +787,35 @@
                 correctCount++;
             } else {
                 let message = 'Incorrect. ';
-                if (!stateCorrect && !capitalCorrect) {
-                    message += `The state is ${currentState} and the capital is ${statesData[currentState].capital}.`;
-                    if (stateSuggestion) {
-                        message += ` Did you mean "${stateSuggestion}" for the state?`;
-                    }
-                    if (capitalSuggestion) {
-                        message += ` Did you mean "${capitalSuggestion}" for the capital?`;
-                    }
-                } else if (!stateCorrect) {
+                if (quizMode === 'states') {
                     message += `The state is ${currentState}.`;
                     if (stateSuggestion) {
                         message += ` Did you mean "${stateSuggestion}"?`;
                     }
-                } else {
+                } else if (quizMode === 'capitals') {
                     message += `The capital is ${statesData[currentState].capital}.`;
                     if (capitalSuggestion) {
                         message += ` Did you mean "${capitalSuggestion}"?`;
+                    }
+                } else {
+                    if (!stateCorrect && !capitalCorrect) {
+                        message += `The state is ${currentState} and the capital is ${statesData[currentState].capital}.`;
+                        if (stateSuggestion) {
+                            message += ` Did you mean "${stateSuggestion}" for the state?`;
+                        }
+                        if (capitalSuggestion) {
+                            message += ` Did you mean "${capitalSuggestion}" for the capital?`;
+                        }
+                    } else if (!stateCorrect) {
+                        message += `The state is ${currentState}.`;
+                        if (stateSuggestion) {
+                            message += ` Did you mean "${stateSuggestion}"?`;
+                        }
+                    } else {
+                        message += `The capital is ${statesData[currentState].capital}.`;
+                        if (capitalSuggestion) {
+                            message += ` Did you mean "${capitalSuggestion}"?`;
+                        }
                     }
                 }
                 feedback.textContent = message;
@@ -662,9 +841,21 @@
         document.getElementById('submit-btn').addEventListener('click', checkAnswer);
         document.getElementById('next-btn').addEventListener('click', newQuestion);
         
+        // Mode selection buttons
+        document.querySelectorAll('.mode-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const mode = btn.getAttribute('data-mode');
+                startQuiz(mode);
+            });
+        });
+        
         document.getElementById('state-input').addEventListener('keypress', (e) => {
             if (e.key === 'Enter' && !answered) {
-                document.getElementById('capital-input').focus();
+                if (quizMode === 'both') {
+                    document.getElementById('capital-input').focus();
+                } else {
+                    checkAnswer();
+                }
             }
         });
         
