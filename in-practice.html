@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Curiosity Analytics LLC | Petroleum Engineering &amp; Data Strategy</title>
+    <meta name="robots" content="noindex, nofollow">
+    <title>In Practice (draft) | Curiosity Analytics LLC</title>
     <meta name="description" content="Curiosity Analytics LLC combines petroleum engineering and data science to help oil and gas teams turn data into decisions.">
     <meta property="og:title" content="Curiosity Analytics LLC">
     <meta property="og:description" content="Petroleum engineering · Data &amp; AI strategy. Turning data into decisions.">
@@ -153,20 +154,11 @@
             padding: 170px 0 190px;
             color: #FFFFFF;
             background-color: var(--teal);
+            background-image: url("assets/contours.svg");
+            background-size: cover;
+            background-position: center;
             overflow: hidden;
         }
-
-        /* Contours sit on their own layer, oversized so they can drift with the cursor */
-        .hero::before {
-            content: "";
-            position: absolute;
-            inset: -24px;
-            background: url("assets/contours.svg") center / cover;
-            transform: translate3d(var(--shift-x, 0px), var(--shift-y, 0px), 0);
-            will-change: transform;
-        }
-
-        .hero > .wrap { position: relative; z-index: 1; }
 
         .hero .kicker { color: var(--gold); }
 
@@ -188,7 +180,6 @@
         .btn {
             display: inline-block;
             padding: 13px 26px;
-            border: 2px solid transparent;
             border-radius: 999px;
             font-weight: 700;
             text-decoration: none;
@@ -209,7 +200,6 @@
             width: 100%;
             height: 120px;
             display: block;
-            z-index: 1;
         }
 
         .swoosh .fill { fill: var(--bg); }
@@ -332,8 +322,6 @@
         }
 
         /* ---------- About ---------- */
-        .about { background: var(--bg-alt); }
-
         .about-grid {
             display: grid;
             grid-template-columns: 1fr 1.4fr;
@@ -444,127 +432,63 @@
             .about-card::after { width: 140px; height: 140px; right: -50px; bottom: -50px; }
             .stairs, .practice-grid { grid-template-columns: 1fr; }
         }
+        .draft-note { background: var(--gold); color: var(--navy); font-weight: 600; text-align: center; padding: 10px 16px; }
+        .draft-note a { color: var(--navy); }
     </style>
 </head>
 <body>
 
-    <header>
-        <div class="wrap">
-            <a class="brand" href="#top" aria-label="Curiosity Analytics home">
-                <img src="assets/logo-mark-lens.png" alt="" width="40" height="39">
-                <span>Curiosity Analytics<small>LLC</small></span>
-            </a>
-            <nav aria-label="Main">
-                <a href="#approach">Approach</a>
-                <a href="#about">About</a>
-                <a class="nav-cta" href="#contact">Get in touch</a>
-            </nav>
-        </div>
-    </header>
+    <div class="draft-note">Draft section, not linked from the site. <a href="index.html">Back to homepage</a></div>
 
-    <main id="top">
-        <section class="hero">
+    <main>
+        <section id="practice" class="practice">
             <div class="wrap">
-                <div class="kicker">Petroleum Engineering &nbsp;·&nbsp; Data &amp; AI Strategy</div>
-                <h1>What questions should your data be answering?</h1>
-                <p>Curiosity Analytics helps oil and gas teams get real answers from their data in time to shape the decision. We bring in whatever sources the question needs, internal or public, and the engineering to make sense of them.</p>
-                <div class="hero-actions">
-                    <a class="btn btn-gold" href="#contact">Start a conversation</a>
-                    <a class="btn btn-ghost" href="#approach">See the approach</a>
-                </div>
-            </div>
-            <svg class="swoosh" viewBox="0 0 1440 120" preserveAspectRatio="none" aria-hidden="true">
-                <path class="fill" d="M0,120 C520,118 1040,80 1440,8 L1440,120 Z"/>
-                <path d="M0,114 C520,112 1040,74 1440,2" fill="none" stroke="#FDB602" stroke-width="5" vector-effect="non-scaling-stroke"/>
-            </svg>
-        </section>
+                <div class="kicker">In Practice</div>
+                <h2>What climbing the model looks like at an operator.</h2>
+                <p class="lede">Examples from building an analytics program inside an E&amp;P company, stage by stage.</p>
 
-        <section id="approach">
-            <div class="wrap">
-                <div class="kicker">The Analytics Maturity Model</div>
-                <h2>Each stage is built on the ones before it.</h2>
-                <p class="lede">It's natural to want to jump to prediction and optimization. The value is real, but it only holds up when the foundation underneath it is solid. We meet you where you are and build upward.</p>
-
-                <div class="stairs">
-                    <article class="stage">
-                        <div class="stage-num">1</div>
-                        <h3>Descriptive</h3>
-                        <p class="q">What's happening?</p>
-                        <p class="desc">Reports, dashboards, and KPIs: the foundation everything else stands on.</p>
-                    </article>
-                    <article class="stage">
-                        <div class="stage-num">2</div>
-                        <h3>Diagnostic</h3>
-                        <p class="q">Why is it happening?</p>
-                        <p class="desc">Root-cause analysis, drill-downs, and correlations.</p>
-                    </article>
-                    <article class="stage">
-                        <div class="stage-num">3</div>
-                        <h3>Predictive</h3>
-                        <p class="q">What's likely next?</p>
-                        <p class="desc">Forecasting, statistical models, and machine learning.</p>
-                    </article>
-                    <article class="stage">
-                        <div class="stage-num">4</div>
-                        <h3>Prescriptive</h3>
-                        <p class="q">What should we do?</p>
-                        <p class="desc">Optimization, simulation, and recommended actions.</p>
-                    </article>
-                </div>
-                <div class="climb">
-                    <span>Value &amp; complexity increase as you climb &rarr;</span>
-                    <span class="emerging">Emerging: agentic / autonomous</span>
-                </div>
-            </div>
-        </section>
-
-        <section id="about" class="about">
-            <div class="wrap about-grid">
-                <div class="about-card">
-                    <div class="kicker" style="color: var(--gold);">Founder</div>
-                    <h3>Timothy D. Kohler</h3>
-                    <div class="roles">Petroleum Engineer<br>Data Scientist</div>
-                    <a class="li-link" href="https://www.linkedin.com/in/tdkohler" target="_blank" rel="noopener">
-                        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"/></svg>
-                        View profile on LinkedIn
-                    </a>
-                </div>
-                <div class="about-text">
-                    <div class="kicker">About</div>
-                    <h2>Engineering judgment, amplified by data</h2>
-                    <p>Curiosity Analytics is a consulting practice led by Timothy Kohler, a petroleum engineer and data scientist. With more than 15 years of hands-on engineering experience, he speaks both languages: the business and the technology. He helps teams figure out which tools will add value and how to make them useful for solving real problems.</p>
-                    <div class="skills">
-                        <span>Reservoir engineering</span>
-                        <span>Operations</span>
-                        <span>Reserves</span>
-                        <span>A&amp;D</span>
-                        <span>AI strategy</span>
-                        <span>Development planning</span>
-                        <span>Data infrastructure</span>
-                        <span>Forecasting</span>
-                        <span>Machine learning</span>
+                <div class="practice-grid">
+                    <div class="case">
+                        <div class="tag">Stage 1 · Visibility</div>
+                        <h3>A foundation of accessible data</h3>
+                        <ul>
+                            <li>A central database that brings together production, well histories, costs, and more</li>
+                            <li>Get hidden data out of spreadsheets, application backends, and inboxes</li>
+                            <li>Keep it fast to query and inexpensive to run</li>
+                        </ul>
+                    </div>
+                    <div class="case">
+                        <div class="tag">Stage 2 · Understanding</div>
+                        <h3>Tools that answer why</h3>
+                        <ul>
+                            <li>Build interactive dashboards and custom analysis tools</li>
+                            <li>Feed data directly into technical software</li>
+                            <li>Automate routine analysis, leaving more time for custom drill-downs</li>
+                        </ul>
+                    </div>
+                    <div class="case">
+                        <div class="tag">Stage 3 · Prediction</div>
+                        <h3>A clearer view ahead</h3>
+                        <ul>
+                            <li>Forecasting pipelines that scale from single wells to entire basins</li>
+                            <li>Analysis that stays current as inputs change</li>
+                            <li>Perspective rooted in reality</li>
+                        </ul>
+                    </div>
+                    <div class="case">
+                        <div class="tag">Stage 4 · Decisions</div>
+                        <h3>Defensible choices</h3>
+                        <ul>
+                            <li>A testable foundation for Eagle Ford spacing assumptions</li>
+                            <li>Identified where bigger completions stopped paying off</li>
+                        </ul>
                     </div>
                 </div>
+
+                <blockquote class="quote">A decision gets made either way, but data makes it defensible.</blockquote>
             </div>
         </section>
 
-        <section id="contact" class="contact">
-            <div class="wrap">
-                <div class="kicker">Contact</div>
-                <h2>Have a question your data can't answer yet?</h2>
-                <p>Let's find out what it would take to answer it.</p>
-                <div class="hero-actions" style="justify-content: center;">
-                    <a class="btn btn-gold" href="mailto:info@curiosityanalytics.com">Send an email</a>
-                </div>
-                <div class="contact-lines">
-                    <a href="mailto:info@curiosityanalytics.com">info@curiosityanalytics.com</a>
-                    <a class="li-link" href="https://www.linkedin.com/in/tdkohler" target="_blank" rel="noopener">
-                        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"/></svg>
-                        LinkedIn
-                    </a>
-                </div>
-            </div>
-        </section>
     </main>
 
     <footer>
@@ -574,38 +498,5 @@
         </div>
     </footer>
 
-    <script>
-        // Subtle parallax: contours drift a few pixels opposite the cursor.
-        (function () {
-            var hero = document.querySelector('.hero');
-            if (!hero || !window.matchMedia) return;
-            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-            if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
-
-            var MAX = 14;            // max shift in px
-            var x = 0, y = 0, tx = 0, ty = 0, frame = null;
-
-            function step() {
-                x += (tx - x) * 0.08;
-                y += (ty - y) * 0.08;
-                hero.style.setProperty('--shift-x', x.toFixed(2) + 'px');
-                hero.style.setProperty('--shift-y', y.toFixed(2) + 'px');
-                frame = (Math.abs(tx - x) > 0.05 || Math.abs(ty - y) > 0.05) ? requestAnimationFrame(step) : null;
-            }
-
-            function aim(nx, ny) {
-                tx = -nx * MAX;
-                ty = -ny * MAX;
-                if (!frame) frame = requestAnimationFrame(step);
-            }
-
-            window.addEventListener('mousemove', function (e) {
-                if (window.scrollY > hero.offsetHeight) return;
-                aim(e.clientX / window.innerWidth * 2 - 1, e.clientY / window.innerHeight * 2 - 1);
-            }, { passive: true });
-
-            document.documentElement.addEventListener('mouseleave', function () { aim(0, 0); });
-        })();
-    </script>
 </body>
 </html>
